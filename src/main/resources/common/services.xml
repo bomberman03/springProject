@@ -9,6 +9,9 @@
     <context:component-scan base-package="koreatech.cse" />
     <context:property-placeholder location="classpath:config.properties" />
 
+    <bean class="springfox.documentation.swagger2.configuration.Swagger2DocumentationConfiguration" id="swagger2Config">
+    </bean>
+
     <bean id="contentNegotiatingViewResolver" class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
         <property name="viewResolvers">
             <list>
