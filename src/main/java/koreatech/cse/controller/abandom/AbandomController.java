@@ -110,6 +110,34 @@ public class AbandomController {
         return body;
     }
 
+    //보호소 리스트
+    @RequestMapping(value = "/shelter", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+    @ResponseBody
+    public String getShelters(@RequestParam(value = "upr_cd") String upr_cd,
+                              @RequestParam(value = "org_cd") String org_cd) throws IOException, URISyntaxException {
+
+        String url = API_URL
+                + "/kind"
+                + "?serviceKey=" + API_KEY
+                + "&upr_cd=" + upr_cd
+                + "&org_cd=" + org_cd;
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("accept", "application/json");
+        HttpEntity<Object> requestEntity = new HttpEntity<Object>(httpHeaders);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> responseEntity = restTemplate.exchange(
+                new URI(url),
+                HttpMethod.GET,
+                requestEntity,
+                String.class);
+
+        String response = responseEntity.getBody();
+
+        return response;
+    }
+
 }
 
 
