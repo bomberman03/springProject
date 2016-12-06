@@ -1,5 +1,5 @@
 
-package koreatech.cse.domain.province;
+package koreatech.cse.domain.abandom.province;
 
 import com.fasterxml.jackson.annotation.*;
 
