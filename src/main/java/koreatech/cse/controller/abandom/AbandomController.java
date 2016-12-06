@@ -3,6 +3,7 @@ package koreatech.cse.controller.abandom;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import koreatech.cse.domain.abandom.abandonment.Abandonment;
 import koreatech.cse.domain.abandom.abandonment.Item;
+import koreatech.cse.domain.abandom.recordAgency.RecordAgency;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -33,6 +34,8 @@ public class AbandomController {
 
     public static final String API_KEY = "psdfPy1sS6i9nBc4rJ4mRTXHCArp%2F8YUmbIb%2FZmnV3XCYoAsVfFb4fNNcwWP%2BnpY5SuREgRlpyrRousUu2iVQg%3D%3D";
     public static final String API_URL = "http://openapi.animal.go.kr:80/openapi/service/rest/abandonmentPublicSrvc";
+    public static final String NAVER_URL = "https://openapi.naver.com/v1/map/geocode?query=";
+    public static final String AGENCY_URL = "http://openapi.animal.go.kr/openapi/service/rest/recordAgencySrvc/recordAgency";
 
     /**
      * 도, 광역시 리스트
@@ -198,6 +201,77 @@ public class AbandomController {
         String response = objectMapper.writeValueAsString(abandonment);
 
         return response;
+    }
+
+
+    @RequestMapping(value = "/agency", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+    @ResponseBody
+    public String getAgencyList(@RequestParam(value = "addr") String addr,
+                                @RequestParam(value = "pageNo", defaultValue = "1") int pageNo,
+                                @RequestParam(value = "numOfRows", defaultValue = "10") int numOfRows
+    ) throws IOException, URISyntaxException {
+
+
+        String url = AGENCY_URL
+                + "?serviceKey=" + API_KEY
+                + "&addr=" + URLEncoder.encode(addr, "UTF-8")
+                + "&pageNo=" + pageNo
+                + "&numOfRows=" + numOfRows;
+
+
+        System.out.println("url = " + url);
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("accept", "application/json");
+        HttpEntity<Object> requestEntity = new HttpEntity<Object>(httpHeaders);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<RecordAgency> responseEntity = restTemplate.exchange(
+                new URI(url),
+                HttpMethod.GET,
+                requestEntity,
+                RecordAgency.class);
+
+        RecordAgency recordAgency = responseEntity.getBody();
+        List<koreatech.cse.domain.abandom.recordAgency.Item> itemList =
+                recordAgency.getResponse().getBody().getItems().getItem();
+
+
+        for (koreatech.cse.domain.abandom.recordAgency.Item item : itemList) {
+            String agencyAddr = item.getAddr(); //**구 **동
+            String agencyDtl = item.getAddrDtl(); // ***번지
+
+            String query = URLEncoder.encode(agencyAddr + " " + agencyDtl, "UTF-8");
+            String naverUrl = NAVER_URL + query;
+
+            Map map = getMap(naverUrl);
+            Point point = map.getResult().getItems().get(0).getPoint();
+
+            item.setAdditionalProperty("point", point);
+        }
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String response = objectMapper.writeValueAsString(recordAgency);
+
+        return response;
+    }
+
+    public Map getMap(String url) throws URISyntaxException {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("X-Naver-Client-Id", "D5LcoutzZs2RrUP3cy8X");
+        httpHeaders.add("X-Naver-Client-Secret", "EI0ZyB0ljz");
+        HttpEntity<Object> requestEntity = new HttpEntity<Object>(httpHeaders);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<Map> responseEntity = restTemplate.exchange(
+                new URI(url),
+                HttpMethod.GET,
+                requestEntity,
+                Map.class);
+
+        Map map = responseEntity.getBody();
+
+        return map;
     }
 
 }
