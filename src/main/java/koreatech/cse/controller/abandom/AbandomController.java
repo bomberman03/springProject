@@ -39,6 +39,13 @@ public class AbandomController {
     public static final String NAVER_URL = "https://openapi.naver.com/v1/map/geocode?query=";
     public static final String AGENCY_URL = "http://openapi.animal.go.kr/openapi/service/rest/recordAgencySrvc/recordAgency";
 
+
+    @RequestMapping("/example")
+    public String exampleView() {
+        return "abandom";
+    }
+
+
     /**
      * 도, 광역시 리스트
      *
