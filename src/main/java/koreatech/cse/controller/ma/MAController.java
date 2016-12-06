@@ -9,9 +9,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
@@ -29,13 +31,19 @@ public class MAController {
     private String naver_vs_url = "https://openapi.naver.com/v1/voice/tts.bin";
     private String [] newsOrders = {"첫번째", "두번째", "세번째", "네번째", "다섯번째", "여섯번째", "일곱번째", "여덟번째", "아홉번째", "열번째"};
 
-    @RequestMapping
+    //edited method maRequest
+    //put annotation ApiIgnore
+    @ApiIgnore
+    @RequestMapping(value = "/maRequest", method = RequestMethod.GET)
     public String maRequest(){
         return "maRequest";
     }
 
+    //num 파라미터를 사용하지 않음
+    //changed this method's name to MachineAnchor and don't use 'num' value anymore
+    @ApiIgnore
     @RequestMapping("/machine_anchor")
-    public String getNaverNews(Model model, @RequestParam(name = "searchWord") String searchWord, @RequestParam(name = "num")int number, HttpServletRequest request) {
+    public String MachineAnchor(Model model, @RequestParam(name = "searchWord") String searchWord, HttpServletRequest request) {
         //System.out.println("받은 숫자 : " + number);
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
