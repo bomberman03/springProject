@@ -65,10 +65,8 @@ public class MAController {
         ////////////////////////////////////////
         List<Item> items = naverNews.getItems();
         String text = "";
+        text += searchWord + "에 관련된 뉴스입니다. ";
         for (int i = 0; i < 10; i++){
-            //System.out.println(items.get(i).getTitle());
-            //System.out.println(items.get(i).getDescription());
-            text += searchWord + "에 관련된 뉴스입니다. ";
             text += newsOrders[i] + "입니다. ";
             text += items.get(i).getTitle().replaceAll("<(/)?([a-zA-Z]*)(\\\\s[a-zA-Z]*=[^>]*)?(\\\\s)*(/)?>", "");
         }
