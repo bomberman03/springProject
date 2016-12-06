@@ -3,6 +3,8 @@ package koreatech.cse.controller.abandom;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import koreatech.cse.domain.abandom.abandonment.Abandonment;
 import koreatech.cse.domain.abandom.abandonment.Item;
+import koreatech.cse.domain.abandom.map.Map;
+import koreatech.cse.domain.abandom.map.Point;
 import koreatech.cse.domain.abandom.recordAgency.RecordAgency;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
