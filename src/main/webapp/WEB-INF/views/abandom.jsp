@@ -10,12 +10,15 @@
 
 <html>
 <head>
+    <meta charset="utf-8">
     <title>Abandom API Example</title>
 
-    <%--도, 광역시 json 파일--%>
+
+<%--도, 광역시 json 파일--%>
     <script id = "province" type="application/json" src="/resources/data/province.json"></script>
 </head>
 <body>
-
+    <input type="date" name = "startDate"><br>
+    <input type="date" name = "endDate">
 </body>
 </html>
