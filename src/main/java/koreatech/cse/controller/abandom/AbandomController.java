@@ -1,5 +1,8 @@
 package koreatech.cse.controller.abandom;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import koreatech.cse.domain.abandom.abandonment.Abandonment;
+import koreatech.cse.domain.abandom.abandonment.Item;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -17,6 +20,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.util.List;
 
 
 /**
@@ -134,6 +139,63 @@ public class AbandomController {
                 String.class);
 
         String response = responseEntity.getBody();
+
+        return response;
+    }
+
+    /*
+     *  유기동물 리스트 API
+     */
+    @RequestMapping(value = "/abandonment", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+    @ResponseBody
+    public String getAbandonmentList(HttpServletRequest request,
+                                     @RequestParam(value = "bgnde") int bgnde,
+                                     @RequestParam(value = "endde") int endde,
+                                     @RequestParam(value = "upkind", defaultValue = "417000") int upkind,
+                                     @RequestParam(value = "pageNo", defaultValue = "1") int pageNo,
+                                     @RequestParam(value = "numOfRows", defaultValue = "10") int numOfRows
+    ) throws IOException, URISyntaxException {
+
+
+        String url = API_URL + "/abandonmentPublic"
+                + "?serviceKey=" + API_KEY
+                + "&bgnde=" + bgnde
+                + "&endde=" + endde
+                + "&upkind=" + upkind
+                + "&pageNo=" + pageNo
+                + "&numOfRows=" + numOfRows;
+
+        System.out.println("url = " + url);
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("accept", "application/json");
+        HttpEntity<Object> requestEntity = new HttpEntity<Object>(httpHeaders);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<Abandonment> responseEntity = restTemplate.exchange(
+                new URI(url),
+                HttpMethod.GET,
+                requestEntity,
+                Abandonment.class);
+
+        Abandonment abandonment = responseEntity.getBody();
+        List<Item> itemList = abandonment.getResponse().getBody().getItems().getItem();
+
+
+        for (Item item : itemList) {
+            String agencyUrl =
+                    "http://"
+                            + request.getServerName()
+                            + ":"
+                            + request.getServerPort()
+                            + "/api/abandom/agency"
+                            + "?addr=" + URLEncoder.encode(item.getOrgNm().trim(), "UTF-8");
+            item.setAdditionalProperty("recordAgency", agencyUrl);
+        }
+
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String response = objectMapper.writeValueAsString(abandonment);
 
         return response;
     }
