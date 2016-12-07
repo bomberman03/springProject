@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
@@ -40,7 +41,7 @@ public class AbandomController {
     public static final String NAVER_URL = "https://openapi.naver.com/v1/map/geocode?query=";
     public static final String AGENCY_URL = "http://openapi.animal.go.kr/openapi/service/rest/recordAgencySrvc/recordAgency";
 
-
+    @ApiIgnore
     @RequestMapping("/example")
     public String exampleView(Model model) {
         model.addAttribute("API_KEY", API_KEY);
@@ -77,39 +78,6 @@ public class AbandomController {
                 + "/sigungu"
                 + "?serviceKey=" + API_KEY
                 + "&upr_cd=" + upr_cd;
-
-
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("accept", "application/json");
-        HttpEntity<Object> requestEntity = new HttpEntity<Object>(httpHeaders);
-
-
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> responseEntity = restTemplate.exchange(
-                new URI(url),
-                HttpMethod.GET,
-                requestEntity,
-                String.class);
-
-        String body = responseEntity.getBody();
-
-        return body;
-    }
-
-    /*      품종 리스트
-             축종코드
-            - 개 : 417000
-            - 고양이 : 422400
-            - 기타 : 429900
-    */
-    @RequestMapping(value = "/kind", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
-    @ResponseBody
-    public String getKinds(@RequestParam(value = "up_kind_cd") String up_kind) throws IOException, URISyntaxException {
-
-        String url = API_URL
-                + "/kind"
-                + "?serviceKey=" + API_KEY
-                + "&up_kind_cd=" + up_kind;
 
 
         HttpHeaders httpHeaders = new HttpHeaders();
