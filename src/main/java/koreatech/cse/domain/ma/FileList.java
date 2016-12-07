@@ -21,6 +21,18 @@ public class FileList {
     @JsonProperty("download_link")
     private String download_link;
 
+    @JsonIgnore
+    public FileList(){
+
+    }
+
+    @JsonIgnore
+    public FileList(String filename, String download_link) {
+        this.filename = filename;
+        this.download_link = download_link;
+    }
+
+
     @JsonProperty("filename")
     public String getFilename() {
         return filename;
@@ -30,6 +42,7 @@ public class FileList {
     public void setFilename(String filename) {
         this.filename = filename;
     }
+
 
     @JsonProperty("download_link")
     public String getDownload_link() {
