@@ -7,6 +7,7 @@ import koreatech.cse.domain.ma.NaverNews;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -14,6 +15,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import springfox.documentation.annotations.ApiIgnore;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -96,14 +98,46 @@ public class MAController {
                 String name = temp.getName();
                 System.out.println("file length  : " + temp.length());
                 System.out.println("file_name : " + name);
-                fileLists.add(new FileList(name, "http://" + request.getServerName() + ":" + request.getServerPort() + "/machine_anchor/download/" + name));
-                //(request.getRequestURL().toString() + "/ma_download/" + name);
+                fileLists.add(new FileList(name, "http://" + request.getServerName() + ":" + request.getServerPort() + "/machine_anchor/download?file_name=" + name));
+                
             }
         }
     machineAnchor.setList(fileLists);
         return new ResponseEntity<MachineAnchor>(machineAnchor, HttpStatus.OK);
     }
 
+    @ApiIgnore
+    @RequestMapping(value = "/machine_anchor/download")
+    public void DownLoadFile(HttpServletResponse response, HttpServletRequest request, @RequestParam(name = "file_name") String file_name) throws Exception{
+        System.out.println("download function is called");
+        String path = request.getSession().getServletContext().getRealPath("/WEB-INF/resources/audio/");
+        File file = new File(path + file_name);
+        response.setContentType("application/download;charset=utf-8");
+        response.setContentLength((int)file.length());
+        String filename = URLEncoder.encode(file_name, "UTF-8");
+        response.setHeader("Content-Disposition", "attachment;filename=\"" + filename + "\";");
+        response.setHeader("Content-Transfer-Encoding", "binary");
+
+        OutputStream out = response.getOutputStream();
+        FileInputStream inputStream = null;
+
+        try{
+            inputStream = new FileInputStream(file);
+            FileCopyUtils.copy(inputStream, out);
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            if(inputStream != null){
+                try {
+                    inputStream.close();
+                }catch (Exception e2){
+                    e2.printStackTrace();
+                }
+            }
+        }
+        out.flush();
+
+    }
 
     private String getVSData(String text, String path, String searchWord){
         String filename = searchWord + ".mp3";
