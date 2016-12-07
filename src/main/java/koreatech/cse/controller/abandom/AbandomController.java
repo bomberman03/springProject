@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -218,7 +219,7 @@ public class AbandomController {
             notes = "검색조건에 해당하는 등록대행업체의 리스트를 가져옵니다.",
             response = Abandonment.class)
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "addr", value = "인천시 연수구", paramType = "query", required = true),
+            @ApiImplicitParam(name = "addr", value = "경기도", paramType = "query", required = true),
             @ApiImplicitParam(name = "pageNo", value = "가져올 페이지 번호", defaultValue = "1", paramType = "query", required = true),
             @ApiImplicitParam(name = "numOfRows", value = "한 페이지당 가져올 데이터의 수", defaultValue = "10", paramType = "query", required = true),
     })
@@ -235,8 +236,6 @@ public class AbandomController {
                 + "&pageNo=" + pageNo
                 + "&numOfRows=" + numOfRows;
 
-
-        System.out.println("url = " + url);
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("accept", "application/json");
@@ -258,11 +257,14 @@ public class AbandomController {
             String agencyAddr = item.getAddr(); //**구 **동
             String agencyDtl = item.getAddrDtl(); // ***번지
 
+            if (agencyDtl == null) {
+
+            }
             String query = URLEncoder.encode(agencyAddr + " " + agencyDtl, "UTF-8");
             String naverUrl = NAVER_URL + query;
 
-            Map map = getMap(naverUrl);
-            Point point = map.getResult().getItems().get(0).getPoint();
+            Point point = getPoint(naverUrl);
+
 
             item.setAdditionalProperty("point", point);
         }
@@ -273,22 +275,34 @@ public class AbandomController {
         return response;
     }
 
-    public Map getMap(String url) throws URISyntaxException {
+    public Point getPoint(String url) throws URISyntaxException {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("X-Naver-Client-Id", "D5LcoutzZs2RrUP3cy8X");
         httpHeaders.add("X-Naver-Client-Secret", "EI0ZyB0ljz");
+        httpHeaders.add("accept", "application/json");
+
         HttpEntity<Object> requestEntity = new HttpEntity<Object>(httpHeaders);
-
         RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<Map> responseEntity = restTemplate.exchange(
-                new URI(url),
-                HttpMethod.GET,
-                requestEntity,
-                Map.class);
 
-        Map map = responseEntity.getBody();
 
-        return map;
+
+        try {
+            ResponseEntity<Map> responseEntity = restTemplate.exchange(
+                    new URI(url),
+                    HttpMethod.GET,
+                    requestEntity,
+                    Map.class);
+
+            Map map = responseEntity.getBody();
+            return map.getResult().getItems().get(0).getPoint();
+        } catch (HttpClientErrorException e){
+            //404 : 요청 쿼리로 좌표를 가져오지 못하면 임의로 0, 0 좌표를 설정
+            Point point = new Point();
+            point.setX(0.0);
+            point.setY(0.0);
+
+            return point;
+        }
     }
 
 }
