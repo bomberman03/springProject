@@ -65,10 +65,10 @@ public class MAController {
         String text = "";
         text += searchWord + "에 관련된 뉴스입니다. ";
         for (int i = 0; i < 10; i++){
-            text += newsOrders[i] + "입니다. ";
+            text += (i == 9) ? "마지막 뉴스입니다. " : newsOrders[i] + "뉴스입니다. ";
             text += items.get(i).getTitle().replaceAll("<(/)?([a-zA-Z]*)(\\\\s[a-zA-Z]*=[^>]*)?(\\\\s)*(/)?>", "").replaceAll("&quot;", "") + ".";
-            //System.out.println(items.get(i).getTitle().replaceAll("<(/)?([a-zA-Z]*)(\\\\s[a-zA-Z]*=[^>]*)?(\\\\s)*(/)?>", "").replaceAll("&quot;", ""));
         }
+        text += " 이상 뉴스를 마치겠습니다. 감사합니다.";
 
         String path = request.getSession().getServletContext().getRealPath("/WEB-INF/resources/audio/");
 
@@ -81,35 +81,37 @@ public class MAController {
     @RequestMapping(value = "/api/machine_anchor", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<MachineAnchor> getMachineAnchorAPIwithJSON(HttpServletRequest request){
         String path = request.getSession().getServletContext().getRealPath("/WEB-INF/resources/audio/");
-        System.out.println("URI : " + request.getRequestURI());
-        System.out.println("URL : " + request.getRequestURL());
-        System.out.println("Server Port : " + request.getServerPort());
-        System.out.println("Server Name : " + request.getServerName());
-        System.out.println(path);
+        String url = "http://" + request.getServerName() + ":" + request.getServerPort() + "/machine_anchor/download?file_name=";
+        //System.out.println("URI : " + request.getRequestURI());
+        //System.out.println("URL : " + request.getRequestURL());
+        //System.out.println("Server Port : " + request.getServerPort());
+        //System.out.println("Server Name : " + request.getServerName());
+        //System.out.println("pathe : " +path);
         MachineAnchor machineAnchor = new MachineAnchor();
         List<FileList> fileLists = new ArrayList<FileList>();
 
         File file = new File(path);
         String [] filelist = file.list();
-        System.out.println("length : " + filelist.length);
+        //System.out.println("length : " + filelist.length);
         for (int i=0; i < filelist.length; i++){
             File temp = new File(path, filelist[i]);
             if(!temp.isDirectory()){
                 String name = temp.getName();
-                System.out.println("file length  : " + temp.length());
-                System.out.println("file_name : " + name);
-                fileLists.add(new FileList(name, "http://" + request.getServerName() + ":" + request.getServerPort() + "/machine_anchor/download?file_name=" + name));
-                
+              //  System.out.println("File URI  : " + temp.toURI());
+              //  System.out.println("file length  : " + temp.length());
+              //  System.out.println("file_name : " + name);
+                fileLists.add(new FileList(name,  url + name, temp.length()));
+
             }
         }
-    machineAnchor.setList(fileLists);
+        machineAnchor.setList(fileLists);
         return new ResponseEntity<MachineAnchor>(machineAnchor, HttpStatus.OK);
     }
 
     @ApiIgnore
     @RequestMapping(value = "/machine_anchor/download")
     public void DownLoadFile(HttpServletResponse response, HttpServletRequest request, @RequestParam(name = "file_name") String file_name) throws Exception{
-        System.out.println("download function is called");
+        //System.out.println("download function is called");
         String path = request.getSession().getServletContext().getRealPath("/WEB-INF/resources/audio/");
         File file = new File(path + file_name);
         response.setContentType("application/download;charset=utf-8");
@@ -136,12 +138,11 @@ public class MAController {
             }
         }
         out.flush();
-
     }
 
     private String getVSData(String text, String path, String searchWord){
         String filename = searchWord + ".mp3";
-        System.out.println(path);
+        //System.out.println(path);
         try {
             URL url = new URL(naver_vs_url);
 
