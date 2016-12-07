@@ -9,6 +9,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <html>
+
 <head>
     <meta charset="utf-8">
     <title>Abandom API Example</title>
@@ -23,6 +24,9 @@
 <input type="date" id="startDate"><br>
 <input type="date" id="endDate"><br>
 <button type="button" id="searchBtn">조회</button>
+<div id="abandonList">
+</div>
+
 </body>
 </html>
 
@@ -46,26 +50,52 @@
         startDate = startYYYY + startMM + startDD;
         endDate = endYYYY + endMM + endDD;
 
+//        console.log(startDate);
+//        console.log(endDate);
+
+
         //ajax call
         $.ajax({
-            url: "/",
-            context: document.body
-        }).done(function() {
-            $( this ).addClass( "done" );
-        });
+            url: "abandonment"
+            + "?bgnde=" + startDate
+            + "&endde=" + endDate,
+            type: "GET",
+            dataType: "JSON",
+            success: function (data) {
+                console.log(data.response.body);
+                $('#abandonList').empty();
 
+                for (var i = 0; i < data.response.body.items.item.length; i++) {
+                    $('#abandonList').append(
+                            $("<li>"
+                            + "접수일 : " + data.response.body.items.item[i].happenDt + "<br>"
+                            + "품종 : " + data.response.body.items.item[i].kindCd + "<br>"
+                            + "보호장소 : " + data.response.body.items.item[i].careAddr + ' '
+                            + data.response.body.items.item[i].careNm+"<br>"
+                            + "<a href='" + data.response.body.items.item[i].popfile + "'>"
+                            + "<img src='" + data.response.body.items.item[i].filename + "'>"
+                            + "</a>"
+                            + "</li>")
+                    );
+                }
+            },
+            error: function () {
+                alert("Error~!");
+            }
+
+        });
     });
 
 
-    function convertNum(num, desc){
-        if(desc=="MM"){
+    function convertNum(num, desc) {
+        if (desc == "MM") {
             num++;
         }
 
 
-        if(num<10){
+        if (num < 10) {
             return "0" + num;
-        } else{
+        } else {
             return num;
         }
     }

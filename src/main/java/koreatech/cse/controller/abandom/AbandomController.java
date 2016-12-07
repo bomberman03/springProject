@@ -1,22 +1,31 @@
 package koreatech.cse.controller.abandom;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import koreatech.cse.domain.abandom.abandonment.Abandonment;
 import koreatech.cse.domain.abandom.abandonment.Item;
 import koreatech.cse.domain.abandom.map.Map;
 import koreatech.cse.domain.abandom.map.Point;
+import koreatech.cse.domain.abandom.province.Province;
 import koreatech.cse.domain.abandom.recordAgency.RecordAgency;
+import koreatech.cse.domain.abandom.shelter.Shelter;
+import koreatech.cse.domain.abandom.sigungu.Sigungu;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
@@ -30,6 +39,8 @@ import java.util.List;
 /**
  * Created by hwangsanghyeok on 29/11/2016.
  */
+
+@Api(value = "유기동물 조회", description = "유기동물 조회 API")
 @Controller
 @RequestMapping("/api/abandom")
 public class AbandomController {
@@ -39,9 +50,10 @@ public class AbandomController {
     public static final String NAVER_URL = "https://openapi.naver.com/v1/map/geocode?query=";
     public static final String AGENCY_URL = "http://openapi.animal.go.kr/openapi/service/rest/recordAgencySrvc/recordAgency";
 
-
+    @ApiIgnore
     @RequestMapping("/example")
-    public String exampleView() {
+    public String exampleView(Model model) {
+        model.addAttribute("API_KEY", API_KEY);
         return "abandom";
     }
 
@@ -54,6 +66,9 @@ public class AbandomController {
      * @throws IOException
      */
     @RequestMapping(value = "/province", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+    @ApiOperation(value = "도, 광역시 리스트",
+            notes = "검색조건에 필요한 도, 광역시의 코드를 가져옵니다.",
+            response = Province.class)
     @ResponseBody
     public FileSystemResource getProvinceList(HttpServletRequest request) throws IOException {
         String path = request.getSession().getServletContext().getRealPath("/WEB-INF/resources/data") + "/province.json";
@@ -68,6 +83,10 @@ public class AbandomController {
      */
     @RequestMapping(value = "/sigungu", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
     @ResponseBody
+    @ApiOperation(value = "시, 군, 구 리스트",
+            notes = "검색조건에 필요한 시,군,구의 코드를 가져옵니다.",
+            response = Sigungu.class)
+    @ApiImplicitParam(name = "upr_cd", value = "도, 광역시의 코드 ex)6110000", paramType = "query", required = true)
     public String getCities(@RequestParam(value = "upr_cd") String upr_cd) throws IOException, URISyntaxException {
 
 
@@ -94,42 +113,12 @@ public class AbandomController {
         return body;
     }
 
-    /*      품종 리스트
-             축종코드
-            - 개 : 417000
-            - 고양이 : 422400
-            - 기타 : 429900
-    */
-    @RequestMapping(value = "/kind", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
-    @ResponseBody
-    public String getKinds(@RequestParam(value = "up_kind_cd") String up_kind) throws IOException, URISyntaxException {
-
-        String url = API_URL
-                + "/kind"
-                + "?serviceKey=" + API_KEY
-                + "&up_kind_cd=" + up_kind;
-
-
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("accept", "application/json");
-        HttpEntity<Object> requestEntity = new HttpEntity<Object>(httpHeaders);
-
-
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> responseEntity = restTemplate.exchange(
-                new URI(url),
-                HttpMethod.GET,
-                requestEntity,
-                String.class);
-
-        String body = responseEntity.getBody();
-
-        return body;
-    }
-
     //보호소 리스트
     @RequestMapping(value = "/shelter", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
     @ResponseBody
+    @ApiOperation(value = "보호소 리스트",
+            notes = "특정 지역의 보호소 리스트를 가져옵니다.",
+            response = Shelter.class)
     public String getShelters(@RequestParam(value = "upr_cd") String upr_cd,
                               @RequestParam(value = "org_cd") String org_cd) throws IOException, URISyntaxException {
 
@@ -160,6 +149,17 @@ public class AbandomController {
      */
     @RequestMapping(value = "/abandonment", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
     @ResponseBody
+    @ApiOperation(value = "유기동물 리스트",
+            notes = "검색조건에 해당하는 유기동물의 리스트를 가져옵니다.",
+            response = Abandonment.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "bgnde", value = "시작 날짜 ex)20161003", paramType = "query", required = true),
+            @ApiImplicitParam(name = "endde", value = "종료 날짜 ex)20161003", paramType = "query", required = true),
+            @ApiImplicitParam(name = "upkind", value = "품종코드", defaultValue = "417000", paramType = "query", required = true),
+            @ApiImplicitParam(name = "pageNo", value = "가져올 페이지 번호", defaultValue = "1", paramType = "query", required = true),
+            @ApiImplicitParam(name = "numOfRows", value = "한 페이지당 가져올 데이터의 수", defaultValue = "10", paramType = "query", required = true)
+    })
+
     public String getAbandonmentList(HttpServletRequest request,
                                      @RequestParam(value = "bgnde") int bgnde,
                                      @RequestParam(value = "endde") int endde,
@@ -214,6 +214,14 @@ public class AbandomController {
 
 
     @RequestMapping(value = "/agency", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+    @ApiOperation(value = "등록대행업체 리스트",
+            notes = "검색조건에 해당하는 등록대행업체의 리스트를 가져옵니다.",
+            response = Abandonment.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "addr", value = "인천시 연수구", paramType = "query", required = true),
+            @ApiImplicitParam(name = "pageNo", value = "가져올 페이지 번호", defaultValue = "1", paramType = "query", required = true),
+            @ApiImplicitParam(name = "numOfRows", value = "한 페이지당 가져올 데이터의 수", defaultValue = "10", paramType = "query", required = true),
+    })
     @ResponseBody
     public String getAgencyList(@RequestParam(value = "addr") String addr,
                                 @RequestParam(value = "pageNo", defaultValue = "1") int pageNo,
