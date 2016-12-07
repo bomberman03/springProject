@@ -1,11 +1,16 @@
 package koreatech.cse.controller.abandom;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import koreatech.cse.domain.abandom.abandonment.Abandonment;
 import koreatech.cse.domain.abandom.abandonment.Item;
 import koreatech.cse.domain.abandom.map.Map;
 import koreatech.cse.domain.abandom.map.Point;
+import koreatech.cse.domain.abandom.province.Province;
 import koreatech.cse.domain.abandom.recordAgency.RecordAgency;
+import koreatech.cse.domain.abandom.shelter.Shelter;
+import koreatech.cse.domain.abandom.sigungu.Sigungu;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -32,6 +37,8 @@ import java.util.List;
 /**
  * Created by hwangsanghyeok on 29/11/2016.
  */
+
+@Api(value = "유기동물 조회", description = "유기동물 조회 API")
 @Controller
 @RequestMapping("/api/abandom")
 public class AbandomController {
@@ -57,6 +64,9 @@ public class AbandomController {
      * @throws IOException
      */
     @RequestMapping(value = "/province", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+    @ApiOperation(value = "도, 광역시 리스트",
+            notes = "검색조건에 필요한 도, 광역시의 코드를 가져옵니다.",
+            response = Province.class)
     @ResponseBody
     public FileSystemResource getProvinceList(HttpServletRequest request) throws IOException {
         String path = request.getSession().getServletContext().getRealPath("/WEB-INF/resources/data") + "/province.json";
@@ -71,6 +81,9 @@ public class AbandomController {
      */
     @RequestMapping(value = "/sigungu", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
     @ResponseBody
+    @ApiOperation(value = "시, 군, 구 리스트",
+            notes = "검색조건에 필요한 시,군,구의 코드를 가져옵니다.",
+            response = Sigungu.class)
     public String getCities(@RequestParam(value = "upr_cd") String upr_cd) throws IOException, URISyntaxException {
 
 
@@ -100,6 +113,9 @@ public class AbandomController {
     //보호소 리스트
     @RequestMapping(value = "/shelter", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
     @ResponseBody
+    @ApiOperation(value = "보호소 리스트",
+            notes = "특정 지역의 보호소 리스트를 가져옵니다.",
+            response = Shelter.class)
     public String getShelters(@RequestParam(value = "upr_cd") String upr_cd,
                               @RequestParam(value = "org_cd") String org_cd) throws IOException, URISyntaxException {
 
@@ -130,6 +146,9 @@ public class AbandomController {
      */
     @RequestMapping(value = "/abandonment", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
     @ResponseBody
+    @ApiOperation(value = "유기동물 리스트",
+            notes = "검색조건에 해당하는 유기동물의 리스트를 가져옵니다.",
+            response = Abandonment.class)
     public String getAbandonmentList(HttpServletRequest request,
                                      @RequestParam(value = "bgnde") int bgnde,
                                      @RequestParam(value = "endde") int endde,
@@ -184,6 +203,9 @@ public class AbandomController {
 
 
     @RequestMapping(value = "/agency", method = RequestMethod.GET, produces = "application/json; charset=utf-8")
+    @ApiOperation(value = "등록대행업체 리스트",
+            notes = "검색조건에 해당하는 등록대행업체의 리스트를 가져옵니다.",
+            response = Abandonment.class)
     @ResponseBody
     public String getAgencyList(@RequestParam(value = "addr") String addr,
                                 @RequestParam(value = "pageNo", defaultValue = "1") int pageNo,
