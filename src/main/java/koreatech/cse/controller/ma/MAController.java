@@ -1,23 +1,24 @@
 package koreatech.cse.controller.ma;
 
+import koreatech.cse.domain.ma.FileList;
 import koreatech.cse.domain.ma.Item;
+import koreatech.cse.domain.ma.MachineAnchor;
 import koreatech.cse.domain.ma.NaverNews;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-
+import springfox.documentation.annotations.ApiIgnore;
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -29,13 +30,16 @@ public class MAController {
     private String naver_vs_url = "https://openapi.naver.com/v1/voice/tts.bin";
     private String [] newsOrders = {"첫번째", "두번째", "세번째", "네번째", "다섯번째", "여섯번째", "일곱번째", "여덟번째", "아홉번째", "열번째"};
 
-    @RequestMapping
+
+    @ApiIgnore
+    @RequestMapping(value = "/maRequest", method = RequestMethod.GET)
     public String maRequest(){
         return "maRequest";
     }
 
-    @RequestMapping("/machine_anchor")
-    public String getNaverNews(Model model, @RequestParam(name = "searchWord") String searchWord, @RequestParam(name = "num")int number, HttpServletRequest request) {
+    @ApiIgnore
+    @RequestMapping(value = "/machine_anchor")
+    public String MachineAnchor(Model model, @RequestParam(name = "searchWord") String searchWord, HttpServletRequest request) {
         //System.out.println("받은 숫자 : " + number);
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
@@ -57,26 +61,51 @@ public class MAController {
         ////////////////////////////////////////
         List<Item> items = naverNews.getItems();
         String text = "";
+        text += searchWord + "에 관련된 뉴스입니다. ";
         for (int i = 0; i < 10; i++){
-            //System.out.println(items.get(i).getTitle());
-            //System.out.println(items.get(i).getDescription());
-            text += searchWord + "에 관련된 뉴스입니다. ";
             text += newsOrders[i] + "입니다. ";
-            text += items.get(i).getTitle().replaceAll("<(/)?([a-zA-Z]*)(\\\\s[a-zA-Z]*=[^>]*)?(\\\\s)*(/)?>", "");
+            text += items.get(i).getTitle().replaceAll("<(/)?([a-zA-Z]*)(\\\\s[a-zA-Z]*=[^>]*)?(\\\\s)*(/)?>", "").replaceAll("&quot;", "") + ".";
+            //System.out.println(items.get(i).getTitle().replaceAll("<(/)?([a-zA-Z]*)(\\\\s[a-zA-Z]*=[^>]*)?(\\\\s)*(/)?>", "").replaceAll("&quot;", ""));
         }
 
         String path = request.getSession().getServletContext().getRealPath("/WEB-INF/resources/audio/");
-        String filename = makeVSFile(text, path, searchWord);
-        //////////////////////////////////////////
-        System.out.println("Size of items : " + items.size());
 
-        //model.addAttribute("searchWord", searchWord);
-        model.addAttribute("filename", filename);
+
+        //System.out.println("Size of items : " + items.size());
+        model.addAttribute("filename", getVSData(text, path, searchWord));
         return "ma";
     }
 
+    @RequestMapping(value = "/api/machine_anchor", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<MachineAnchor> getMachineAnchorAPIwithJSON(HttpServletRequest request){
+        String path = request.getSession().getServletContext().getRealPath("/WEB-INF/resources/audio/");
+        System.out.println("URI : " + request.getRequestURI());
+        System.out.println("URL : " + request.getRequestURL());
+        System.out.println("Server Port : " + request.getServerPort());
+        System.out.println("Server Name : " + request.getServerName());
+        System.out.println(path);
+        MachineAnchor machineAnchor = new MachineAnchor();
+        List<FileList> fileLists = new ArrayList<FileList>();
 
-    private String makeVSFile(String text, String path, String searchWord){
+        File file = new File(path);
+        String [] filelist = file.list();
+        System.out.println("length : " + filelist.length);
+        for (int i=0; i < filelist.length; i++){
+            File temp = new File(path, filelist[i]);
+            if(!temp.isDirectory()){
+                String name = temp.getName();
+                System.out.println("file length  : " + temp.length());
+                System.out.println("file_name : " + name);
+                fileLists.add(new FileList(name, "http://" + request.getServerName() + ":" + request.getServerPort() + "/machine_anchor/download/" + name));
+                //(request.getRequestURL().toString() + "/ma_download/" + name);
+            }
+        }
+    machineAnchor.setList(fileLists);
+        return new ResponseEntity<MachineAnchor>(machineAnchor, HttpStatus.OK);
+    }
+
+
+    private String getVSData(String text, String path, String searchWord){
         String filename = searchWord + ".mp3";
         System.out.println(path);
         try {
@@ -107,8 +136,6 @@ public class MAController {
                 InputStream is = con.getInputStream(); //InputStream을 연다
                 int read = 0;
                 byte[] bytes = new byte[1024];
-                // 랜덤한 이름으로 mp3 파일 생성
-                //filename = Long.valueOf(new Date().getTime()).toString() + ".mp3";
 
                 System.out.println(filename);
                 //파일이 저장되는 경로
@@ -139,7 +166,7 @@ public class MAController {
         }catch (Exception e){
             System.out.println(e);
         }
-        //model.addAttribute("filename", tempname);
+
         return filename;
     }
 }
