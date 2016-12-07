@@ -15,13 +15,13 @@
 }(document, 'script', 'facebook-jssdk'));</script>
 <h2>쇼핑 검색 결과: 질의어 - ${searchWord}</h2>
 
-<c:forEach var="item" items="${daumShop.channel.item}">
+<c:forEach var="item" items="${shop.channel.item}">
     <div>${item.title}</div>
     <div>
         <img src=${item.imageUrl} />
     </div>
     <div>${item.priceMin} 원 ~ ${item.priceMax} 원</div>
-    <c:forEach var="blog" items="${daumBlogHash[item.title].channel.item}">
+    <c:forEach var="blog" items="${item.blogs.channel.item}">
         <div>
             ${blog.title}
         </div>

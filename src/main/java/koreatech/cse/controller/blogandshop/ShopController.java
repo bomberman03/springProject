@@ -3,6 +3,7 @@ package koreatech.cse.controller.blogandshop;
 import koreatech.cse.domain.blogandshop.daum.blog.DaumBlog;
 import koreatech.cse.domain.blogandshop.daum.shop.DaumShop;
 import koreatech.cse.domain.blogandshop.daum.shop.Item;
+import koreatech.cse.domain.blogandshop.meshup.Shop;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,30 +27,35 @@ public class ShopController {
 
     private static String daum_rest_api_key = "9cae039e021379f226d87b0f814c635b";   //본인 것으로 추가하기
 
-    private DaumShop getDaumShop(String searchWord) {
+    private Shop getShop(String searchWord) {
         RestTemplate restTemplate = new RestTemplate();
-        DaumShop daumShop = null;
+        Shop shop = null;
         try {
-            ResponseEntity<DaumShop> daumShopResponseEntity
-                    = restTemplate.getForEntity(daum_shop_url + "?q=" + searchWord + "&output=json" + "&apikey=" + daum_rest_api_key, DaumShop.class);
-            daumShop = daumShopResponseEntity.getBody();
-            System.out.println(daumShop);
-        }catch (HttpClientErrorException e) {
+            ResponseEntity<Shop> shopResponseEntity
+                    = restTemplate.getForEntity(daum_shop_url + "?q=" + searchWord + "&output=json" + "&apikey=" + daum_rest_api_key, Shop.class);
+            shop = shopResponseEntity.getBody();
+            for(koreatech.cse.domain.blogandshop.meshup.Item item : shop.getChannel().getItem()) {
+                ResponseEntity<DaumBlog> daumBlogResponseEntity
+                        = restTemplate.getForEntity(daum_blog_url + "?q=" + item.getTitle() +"&output=json" + "&apikey=" + daum_rest_api_key, DaumBlog.class);
+                DaumBlog daumBlog = daumBlogResponseEntity.getBody();
+                item.setBlogs(daumBlog);
+            }
+        } catch(HttpClientErrorException e) {
             System.out.println(e.getStatusCode() + ": " + e.getStatusText());
         }
-        return daumShop;
+        return shop;
     }
 
     @RequestMapping(value = "/api/shop", method = RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<DaumShop> getShopWithJustAPIKey(@RequestParam(name = "searchWord") String searchWord) {
-        DaumShop daumShop = getDaumShop(searchWord);
-        return new ResponseEntity<DaumShop>(daumShop, HttpStatus.OK);
+    public ResponseEntity<Shop> getShopWithJustAPIKey(@RequestParam(name = "searchWord") String searchWord) {
+        Shop shop = getShop(searchWord);
+        return new ResponseEntity<Shop>(shop, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/api/shop", params = "format=xml", method = RequestMethod.GET, produces=MediaType.APPLICATION_XML_VALUE)
-    public ResponseEntity<DaumShop> getShopWithJustAPIKeyXML(@RequestParam(name = "searchWord") String searchWord) {
-        DaumShop daumShop = getDaumShop(searchWord);
-        return new ResponseEntity<DaumShop>(daumShop, HttpStatus.OK);
+    public ResponseEntity<Shop> getShopWithJustAPIKeyXML(@RequestParam(name = "searchWord") String searchWord) {
+        Shop shop = getShop(searchWord);
+        return new ResponseEntity<Shop>(shop, HttpStatus.OK);
     }
 
     @ApiIgnore
@@ -62,27 +68,9 @@ public class ShopController {
     @RequestMapping("/shop")
     public String getShopWithJustAPIKey(Model model,
                                             @RequestParam(name = "searchWord") String searchWord) {
-        RestTemplate restTemplate = new RestTemplate();
-        DaumShop daumShop = null;
-        HashMap<String, DaumBlog> blogHashMap = new HashMap<String, DaumBlog>();
-        try {
-            ResponseEntity<DaumShop> daumShopResponseEntity
-                    = restTemplate.getForEntity(daum_shop_url + "?q=" + searchWord + "&output=json" + "&apikey=" + daum_rest_api_key, DaumShop.class);
-            daumShop = daumShopResponseEntity.getBody();
-            System.out.println(daumShop);
-            for(Item item : daumShop.getChannel().getItem()) {
-                ResponseEntity<DaumBlog> daumBlogResponseEntity
-                        = restTemplate.getForEntity(daum_blog_url + "?q=" + item.getTitle() +"&output=json" + "&apikey=" + daum_rest_api_key, DaumBlog.class);
-                DaumBlog daumBlog = daumBlogResponseEntity.getBody();
-                System.out.println(daumBlog);
-                blogHashMap.put(item.getTitle(), daumBlog);
-            }
-        } catch (HttpClientErrorException e) {
-            System.out.println(e.getStatusCode() + ": " + e.getStatusText());
-        }
+        Shop shop = getShop(searchWord);
         model.addAttribute("searchWord", searchWord);
-        model.addAttribute("daumShop", daumShop);
-        model.addAttribute("daumBlogHash", blogHashMap);
+        model.addAttribute("shop", shop);
         return "shop";
     }
 }

@@ -391,19 +391,19 @@ public class Item {
     /**
      *
      * @return
-     *     The shoppingmall
+     *     The blogs
      */
-    @JsonProperty("shoppingmall")
+    @JsonProperty("blogs")
     public DaumBlog getBlogs() {
         return blogs;
     }
 
     /**
      *
-     * @param shoppingmall
-     *     The shoppingmall
+     * @param blogs
+     *     The blogs
      */
-    @JsonProperty("shoppingmall")
+    @JsonProperty("blogs")
     public void setBlogs(DaumBlog blogs) {
         this.blogs = blogs;
     }

@@ -51,7 +51,7 @@ public class Shop {
 
     @Override
     public String toString() {
-        return "DaumShop{" +
+        return "Shop{" +
                 "channel=" + channel +
                 ", additionalProperties=" + additionalProperties +
                 '}';
