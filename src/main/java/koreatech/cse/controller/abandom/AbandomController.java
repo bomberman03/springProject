@@ -12,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -41,7 +42,8 @@ public class AbandomController {
 
 
     @RequestMapping("/example")
-    public String exampleView() {
+    public String exampleView(Model model) {
+        model.addAttribute("API_KEY", API_KEY);
         return "abandom";
     }
 

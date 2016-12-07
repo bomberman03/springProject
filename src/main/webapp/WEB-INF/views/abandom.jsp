@@ -23,6 +23,9 @@
 <input type="date" id="startDate"><br>
 <input type="date" id="endDate"><br>
 <button type="button" id="searchBtn">조회</button>
+<div id="abandonList">
+</div>
+
 </body>
 </html>
 
@@ -46,26 +49,45 @@
         startDate = startYYYY + startMM + startDD;
         endDate = endYYYY + endMM + endDD;
 
+//        console.log(startDate);
+//        console.log(endDate);
+
+
         //ajax call
         $.ajax({
-            url: "/",
-            context: document.body
-        }).done(function() {
-            $( this ).addClass( "done" );
-        });
+            url: "abandonment"
+            + "?bgnde=" + startDate
+            + "&endde=" + endDate,
+            type: "GET",
+            dataType: "JSON",
+            success: function (data) {
+                console.log(data.response.body);
+                $('#abandonList').empty();
 
+                for (var i = 0; i < data.response.body.items.item.length; i++) {
+                    $('#abandonList').append(
+                            $("<a href='" + data.response.body.items.item[i].recordAgency + "'>"
+                            + "<li><img src='" + data.response.body.items.item[i].filename + "'></li>"
+                            + "</a>"));
+                }
+            },
+            error :function(){
+                alert("Error~!");
+            }
+
+        });
     });
 
 
-    function convertNum(num, desc){
-        if(desc=="MM"){
+    function convertNum(num, desc) {
+        if (desc == "MM") {
             num++;
         }
 
 
-        if(num<10){
+        if (num < 10) {
             return "0" + num;
-        } else{
+        } else {
             return num;
         }
     }
