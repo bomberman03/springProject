@@ -9,6 +9,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <html>
+
 <head>
     <meta charset="utf-8">
     <title>Abandom API Example</title>
@@ -66,12 +67,19 @@
 
                 for (var i = 0; i < data.response.body.items.item.length; i++) {
                     $('#abandonList').append(
-                            $("<a href='" + data.response.body.items.item[i].recordAgency + "'>"
-                            + "<li><img src='" + data.response.body.items.item[i].filename + "'></li>"
-                            + "</a>"));
+                            $("<li>"
+                            + "접수일 : " + data.response.body.items.item[i].happenDt + "<br>"
+                            + "품종 : " + data.response.body.items.item[i].kindCd + "<br>"
+                            + "보호장소 : " + data.response.body.items.item[i].careAddr + ' '
+                            + data.response.body.items.item[i].careNm+"<br>"
+                            + "<a href='" + data.response.body.items.item[i].popfile + "'>"
+                            + "<img src='" + data.response.body.items.item[i].filename + "'>"
+                            + "</a>"
+                            + "</li>")
+                    );
                 }
             },
-            error :function(){
+            error: function () {
                 alert("Error~!");
             }
 
