@@ -47,6 +47,12 @@
         endDate = endYYYY + endMM + endDD;
 
         //ajax call
+        $.ajax({
+            url: "/",
+            context: document.body
+        }).done(function() {
+            $( this ).addClass( "done" );
+        });
 
     });
 
