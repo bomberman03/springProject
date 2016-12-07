@@ -1,8 +1,6 @@
 package koreatech.cse.controller.blogandshop;
 
 import koreatech.cse.domain.blogandshop.daum.blog.DaumBlog;
-import koreatech.cse.domain.blogandshop.daum.shop.DaumShop;
-import koreatech.cse.domain.blogandshop.daum.shop.Item;
 import koreatech.cse.domain.blogandshop.meshup.Shop;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -16,8 +14,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.HashMap;
-
 @Controller
 @RequestMapping("/")
 public class ShopController {
@@ -25,7 +21,7 @@ public class ShopController {
     private static String daum_shop_url = "https://apis.daum.net/shopping/search";
     private static String daum_blog_url = "https://apis.daum.net/search/blog";
 
-    private static String daum_rest_api_key = "9cae039e021379f226d87b0f814c635b";   //본인 것으로 추가하기
+    private static String daum_rest_api_key = "95769589dcb0eeb5179d7c16e5e0ef67";   //본인 것으로 추가하기
 
     private Shop getShop(String searchWord) {
         RestTemplate restTemplate = new RestTemplate();
@@ -35,9 +31,14 @@ public class ShopController {
                     = restTemplate.getForEntity(daum_shop_url + "?q=" + searchWord + "&output=json" + "&apikey=" + daum_rest_api_key, Shop.class);
             shop = shopResponseEntity.getBody();
             for(koreatech.cse.domain.blogandshop.meshup.Item item : shop.getChannel().getItem()) {
+                item.setCategoryName(item.getCategoryName().replaceAll("&gt;", ""));
                 ResponseEntity<DaumBlog> daumBlogResponseEntity
                         = restTemplate.getForEntity(daum_blog_url + "?q=" + item.getTitle() +"&output=json" + "&apikey=" + daum_rest_api_key, DaumBlog.class);
                 DaumBlog daumBlog = daumBlogResponseEntity.getBody();
+                for(koreatech.cse.domain.blogandshop.daum.blog.Item blogItem : daumBlog.getChannel().getItem() ) {
+                    blogItem.setTitle(blogItem.getTitle().replaceAll("&lt;[^&]*&gt;", ""));
+                    blogItem.setDescription(blogItem.getDescription().replaceAll("&lt;[^&]*&gt;", ""));
+                }
                 item.setBlogs(daumBlog);
             }
         } catch(HttpClientErrorException e) {
