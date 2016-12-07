@@ -2,6 +2,8 @@ package koreatech.cse.controller.abandom;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import koreatech.cse.domain.abandom.abandonment.Abandonment;
 import koreatech.cse.domain.abandom.abandonment.Item;
@@ -84,6 +86,7 @@ public class AbandomController {
     @ApiOperation(value = "시, 군, 구 리스트",
             notes = "검색조건에 필요한 시,군,구의 코드를 가져옵니다.",
             response = Sigungu.class)
+    @ApiImplicitParam(name = "upr_cd", value = "도, 광역시의 코드 ex)6110000", paramType = "query", required = true)
     public String getCities(@RequestParam(value = "upr_cd") String upr_cd) throws IOException, URISyntaxException {
 
 
@@ -149,6 +152,14 @@ public class AbandomController {
     @ApiOperation(value = "유기동물 리스트",
             notes = "검색조건에 해당하는 유기동물의 리스트를 가져옵니다.",
             response = Abandonment.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "bgnde", value = "시작 날짜 ex)20161003", paramType = "query", required = true),
+            @ApiImplicitParam(name = "endde", value = "종료 날짜 ex)20161003", paramType = "query", required = true),
+            @ApiImplicitParam(name = "upkind", value = "품종코드", defaultValue = "417000", paramType = "query", required = true),
+            @ApiImplicitParam(name = "pageNo", value = "가져올 페이지 번호", defaultValue = "1", paramType = "query", required = true),
+            @ApiImplicitParam(name = "numOfRows", value = "한 페이지당 가져올 데이터의 수", defaultValue = "10", paramType = "query", required = true)
+    })
+
     public String getAbandonmentList(HttpServletRequest request,
                                      @RequestParam(value = "bgnde") int bgnde,
                                      @RequestParam(value = "endde") int endde,
@@ -206,6 +217,11 @@ public class AbandomController {
     @ApiOperation(value = "등록대행업체 리스트",
             notes = "검색조건에 해당하는 등록대행업체의 리스트를 가져옵니다.",
             response = Abandonment.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "addr", value = "인천시 연수구", paramType = "query", required = true),
+            @ApiImplicitParam(name = "pageNo", value = "가져올 페이지 번호", defaultValue = "1", paramType = "query", required = true),
+            @ApiImplicitParam(name = "numOfRows", value = "한 페이지당 가져올 데이터의 수", defaultValue = "10", paramType = "query", required = true),
+    })
     @ResponseBody
     public String getAgencyList(@RequestParam(value = "addr") String addr,
                                 @RequestParam(value = "pageNo", defaultValue = "1") int pageNo,
