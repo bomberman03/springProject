@@ -12,6 +12,7 @@
 <a href="/maRequest">Machine Anchor</a></br>
 <a href="/shop_request">Shop</a></br>
 <a href="/api/abandom/example">Abandom</a></br>
+<a href="/swagger-ui.html">API Document Page</a></br>
 
 
 </body>
