@@ -26,17 +26,17 @@ public class ShopController {
 
     private static String daum_rest_api_key = "95769589dcb0eeb5179d7c16e5e0ef67";   //본인 것으로 추가하기
 
-    private Shop getShop(String searchWord) {
+    private Shop getShop(String searchWord, int result, int pageno, String sort, String output) {
         RestTemplate restTemplate = new RestTemplate();
         Shop shop = null;
         try {
             ResponseEntity<Shop> shopResponseEntity
-                    = restTemplate.getForEntity(daum_shop_url + "?q=" + searchWord + "&output=json" + "&apikey=" + daum_rest_api_key, Shop.class);
+                    = restTemplate.getForEntity(daum_shop_url + "?q=" + searchWord + "&result=" + result + "&pageno=" + pageno + "&sort=" + sort + "&output=" + output + "&apikey=" + daum_rest_api_key, Shop.class);
             shop = shopResponseEntity.getBody();
             for(koreatech.cse.domain.blogandshop.meshup.Item item : shop.getChannel().getItem()) {
                 item.setCategoryName(item.getCategoryName().replaceAll("&gt;", ""));
                 ResponseEntity<DaumBlog> daumBlogResponseEntity
-                        = restTemplate.getForEntity(daum_blog_url + "?q=" + item.getTitle() +"&output=json" + "&apikey=" + daum_rest_api_key, DaumBlog.class);
+                        = restTemplate.getForEntity(daum_blog_url + "?q=" + item.getTitle() +"&output=" + output + "&apikey=" + daum_rest_api_key, DaumBlog.class);
                 DaumBlog daumBlog = daumBlogResponseEntity.getBody();
                 for(koreatech.cse.domain.blogandshop.daum.blog.Item blogItem : daumBlog.getChannel().getItem() ) {
                     blogItem.setTitle(blogItem.getTitle().replaceAll("&lt;[^&]*&gt;", ""));
@@ -53,16 +53,12 @@ public class ShopController {
     @RequestMapping(value = "/api/shop", method = RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "쇼핑&블로그 검색",
             notes = "키워드에 대한 상품과 관련된 블로그 검색")
-    public ResponseEntity<Shop> getShopWithJustAPIKey(@RequestParam(name = "searchWord") String searchWord) {
-        Shop shop = getShop(searchWord);
-        return new ResponseEntity<Shop>(shop, HttpStatus.OK);
-    }
-
-    @RequestMapping(value = "/api/shop", params = "format=xml", method = RequestMethod.GET, produces=MediaType.APPLICATION_XML_VALUE)
-    @ApiOperation(value = "쇼핑&블로그 검색",
-            notes = "키워드에 대한 상품과 관련된 블로그 검색")
-    public ResponseEntity<Shop> getShopWithJustAPIKeyXML(@RequestParam(name = "searchWord") String searchWord) {
-        Shop shop = getShop(searchWord);
+    public ResponseEntity<Shop> getShopWithJustAPIKey(@RequestParam(name = "searchWord") String searchWord,
+                                                      @RequestParam(name = "result", defaultValue = "10") int result,
+                                                      @RequestParam(name = "pageno", defaultValue = "1") int pageno,
+                                                      @RequestParam(name = "sort", defaultValue = "pop") String sort,
+                                                      @RequestParam(name = "output", defaultValue = "json") String output) {
+        Shop shop = getShop(searchWord, result, pageno, sort, output);
         return new ResponseEntity<Shop>(shop, HttpStatus.OK);
     }
 
@@ -75,8 +71,12 @@ public class ShopController {
     @ApiIgnore
     @RequestMapping("/shop")
     public String getShopWithJustAPIKey(Model model,
-                                            @RequestParam(name = "searchWord") String searchWord) {
-        Shop shop = getShop(searchWord);
+                                        @RequestParam(name = "searchWord") String searchWord,
+                                        @RequestParam(name = "result", defaultValue = "10") int result,
+                                        @RequestParam(name = "pageno", defaultValue = "1") int pageno,
+                                        @RequestParam(name = "sort", defaultValue = "pop") String sort,
+                                        @RequestParam(name = "output", defaultValue = "json") String output) {
+        Shop shop = getShop(searchWord, result, pageno, sort, output);
         model.addAttribute("searchWord", searchWord);
         model.addAttribute("shop", shop);
         return "shop";
