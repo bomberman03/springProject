@@ -22,14 +22,14 @@
         </div>
 
         <c:forEach var="item" items="${shop.channel.item}">
-            <div>${item.title}</div>
+            <div><a href="${item.link}">${item.title}</a></div>
             <div>
                 <img src=${item.imageUrl} />
             </div>
             <div>${item.priceMin} 원 ~ ${item.priceMax} 원</div>
             <c:forEach var="blog" items="${item.blogs.channel.item}">
                 <div>
-                    <c:out value="${blog.title}" escapeXml="false" />
+                    <a href="${blog.link}"><c:out value="${blog.title}" escapeXml="false" /></a>
                 </div>
             </c:forEach>
             <div class="fb-like" data-href=${item.link} data-layout="button_count" data-action="like" data-size="small" data-show-faces="true" data-share="true"></div>

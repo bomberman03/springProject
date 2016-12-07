@@ -1,5 +1,7 @@
 package koreatech.cse.controller.blogandshop;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import koreatech.cse.domain.blogandshop.daum.blog.DaumBlog;
 import koreatech.cse.domain.blogandshop.meshup.Shop;
 import org.springframework.http.HttpStatus;
@@ -15,6 +17,7 @@ import org.springframework.web.client.RestTemplate;
 import springfox.documentation.annotations.ApiIgnore;
 
 @Controller
+@Api(value = "스웨거 테스트", description = "쇼핑과 블로그를 함께 검색하는 API")
 @RequestMapping("/")
 public class ShopController {
 
@@ -48,12 +51,16 @@ public class ShopController {
     }
 
     @RequestMapping(value = "/api/shop", method = RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "쇼핑&블로그 검색",
+            notes = "키워드에 대한 상품과 관련된 블로그 검색")
     public ResponseEntity<Shop> getShopWithJustAPIKey(@RequestParam(name = "searchWord") String searchWord) {
         Shop shop = getShop(searchWord);
         return new ResponseEntity<Shop>(shop, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/api/shop", params = "format=xml", method = RequestMethod.GET, produces=MediaType.APPLICATION_XML_VALUE)
+    @ApiOperation(value = "쇼핑&블로그 검색",
+            notes = "키워드에 대한 상품과 관련된 블로그 검색")
     public ResponseEntity<Shop> getShopWithJustAPIKeyXML(@RequestParam(name = "searchWord") String searchWord) {
         Shop shop = getShop(searchWord);
         return new ResponseEntity<Shop>(shop, HttpStatus.OK);
