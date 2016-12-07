@@ -5,47 +5,34 @@ package koreatech.cse.domain.ma;
  */
 import com.fasterxml.jackson.annotation.*;
 import javax.annotation.Generated;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("org.jsonschema2pojo")
 @JsonPropertyOrder({
-        "filename",
-        "download_link"
+    "list"
 })
 
 public class MachineAnchor {
-    @JsonProperty("filename")
-    private String filename;
+    @JsonProperty("list")
+    private List<FileList> list = new ArrayList<FileList>();
 
-    @JsonProperty("download_link")
-    private String download_link;
-
-    @JsonProperty("filename")
-    public String getFilename() {
-        return filename;
+    @JsonProperty("list")
+    public List<FileList> getList() {
+        return list;
     }
 
-    @JsonProperty("filename")
-    public void setFilename(String filename) {
-        this.filename = filename;
-    }
-
-    @JsonProperty("download_link")
-    public String getDownload_link() {
-        return download_link;
-    }
-
-    @JsonProperty("download_link")
-    public void setDownload_link(String download_link) {
-        this.download_link = download_link;
+    @JsonProperty("list")
+    public void setList(List<FileList> list) {
+        this.list = list;
     }
 
     @Override
     public String toString() {
         return "MachineAnchor{" +
-                "filename='" + filename + '\'' +
-                ", download_link='" + download_link + '\'' +
+                "list=" + list +
                 '}';
     }
 }
