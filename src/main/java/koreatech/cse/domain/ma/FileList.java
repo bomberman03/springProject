@@ -11,6 +11,7 @@ import javax.annotation.Generated;
 @Generated("org.jsonschema2pojo")
 @JsonPropertyOrder({
         "filename",
+        "file_length",
         "download_link"
 })
 
@@ -21,17 +22,30 @@ public class FileList {
     @JsonProperty("download_link")
     private String download_link;
 
+    @JsonProperty("file_length")
+    private long file_length;
+
     @JsonIgnore
     public FileList(){
 
     }
 
     @JsonIgnore
-    public FileList(String filename, String download_link) {
+    public FileList(String filename, String download_link, long file_length) {
         this.filename = filename;
+        this.file_length = file_length;
         this.download_link = download_link;
     }
 
+    @JsonProperty("file_length")
+    public long getFile_length() {
+        return file_length;
+    }
+
+    @JsonProperty("file_length")
+    public void setFile_length(long file_length) {
+        this.file_length = file_length;
+    }
 
     @JsonProperty("filename")
     public String getFilename() {
