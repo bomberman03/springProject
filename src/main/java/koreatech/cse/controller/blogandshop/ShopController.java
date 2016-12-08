@@ -50,15 +50,25 @@ public class ShopController {
         return shop;
     }
 
-    @RequestMapping(value = "/api/shop", method = RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/api/shop", method = RequestMethod.GET, produces={MediaType.APPLICATION_JSON_VALUE})
     @ApiOperation(value = "쇼핑&블로그 검색",
             notes = "키워드에 대한 상품과 관련된 블로그 검색")
     public ResponseEntity<Shop> getShopWithJustAPIKey(@RequestParam(name = "searchWord") String searchWord,
                                                       @RequestParam(name = "result", defaultValue = "10") int result,
                                                       @RequestParam(name = "pageno", defaultValue = "1") int pageno,
-                                                      @RequestParam(name = "sort", defaultValue = "pop") String sort,
-                                                      @RequestParam(name = "output", defaultValue = "json") String output) {
-        Shop shop = getShop(searchWord, result, pageno, sort, output);
+                                                      @RequestParam(name = "sort", defaultValue = "pop") String sort) {
+        Shop shop = getShop(searchWord, result, pageno, sort, "json");
+        return new ResponseEntity<Shop>(shop, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/api/xml/shop", method = RequestMethod.GET, produces={MediaType.APPLICATION_XML_VALUE})
+    @ApiOperation(value = "쇼핑&블로그 검색",
+            notes = "키워드에 대한 상품과 관련된 블로그 검색")
+    public ResponseEntity<Shop> getShopWithJustAPIKeyXML(@RequestParam(name = "searchWord") String searchWord,
+                                                      @RequestParam(name = "result", defaultValue = "10") int result,
+                                                      @RequestParam(name = "pageno", defaultValue = "1") int pageno,
+                                                      @RequestParam(name = "sort", defaultValue = "pop") String sort) {
+        Shop shop = getShop(searchWord, result, pageno, sort, "json");
         return new ResponseEntity<Shop>(shop, HttpStatus.OK);
     }
 
